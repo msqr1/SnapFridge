@@ -1,7 +1,6 @@
 import "@pigment-css/react/styles.css";
 import "./globalStyles";
 import { Poppins } from "next/font/google";
-import ThemeProvider from "./providers";
 import NavBar from "@components/NavBar";
 import Footer from "@components/Footer";
 import CookieBanner from "@components/CookieBanner";
@@ -23,22 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={poppins.className} suppressHydrationWarning>
+    <html lang="en" className={poppins.className} style={{ display: "none" }}>
       <body>
-        {/* theme provider from next-themes, handles the dark/light theming */}
-        <ThemeProvider
-          attribute="data-theme"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Background>
-            <NavBar></NavBar>
-            <Main>{children}</Main>
-            <Footer></Footer>
-            <CookieBanner></CookieBanner>
-          </Background>
-        </ThemeProvider>
+        <Background>
+          <NavBar></NavBar>
+          <Main>{children}</Main>
+          <Footer></Footer>
+          <CookieBanner></CookieBanner>
+        </Background>
       </body>
     </html>
   );
@@ -48,7 +39,7 @@ const Background = styled("div")({
   flexDirection: "column",
   minHeight: "100%",
   color: "var(--text-950)",
-  background: "var(--background)",
+  background: "var(--background-0)",
   isolation: "isolate",
 });
 

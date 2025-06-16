@@ -1,9 +1,190 @@
-import { withPigment } from "@pigment-css/nextjs-plugin";
+import { extendTheme, withPigment } from "@pigment-css/nextjs-plugin";
 
-export default withPigment({
-  // ... Your nextjs config.
-  images: {
-    remotePatterns: [new URL('https://img.spoonacular.com/recipes/**')],
+export default withPigment(
+  {
+    // ... Your nextjs config.
+    images: {
+      remotePatterns: [new URL('https://img.spoonacular.com/recipes/**')],
+    },
+    distDir: "build"
   },
-  distDir: "build"
-});
+  {
+    theme: extendTheme({
+      colorSchemes: {
+        light: {
+          text: {
+            50: "#e9fbfa",
+            100: "#d4f7f5",
+            200: "#a9efec",
+            300: "#7ee7e2",
+            400: "#53dfd8",
+            500: "#28d7cf",
+            600: "#20aca5",
+            700: "#18817c",
+            800: "#105653",
+            900: "#082b29",
+            950: "#041615",
+          },
+          background: {
+            0: "#ffffff",
+            50: "#eafbfa",
+            100: "#d4f7f5",
+            200: "#a9efea",
+            300: "#7ee7e0",
+            400: "#54ded5",
+            500: "#29d6cb",
+            600: "#21aba2",
+            700: "#18817a",
+            800: "#105651",
+            900: "#082b29",
+            950: "#041514",
+          },
+          primary: {
+            50: "#eff6f5",
+            100: "#deedec",
+            200: "#bddbd9",
+            300: "#9cc9c6",
+            400: "#7bb7b3",
+            500: "#5ba4a0",
+            600: "#488480",
+            700: "#366360",
+            800: "#244240",
+            900: "#122120",
+            950: "#091010",
+          },
+          secondary: {
+            50: "#ebf6fa",
+            100: "#d7eef4",
+            200: "#afdce9",
+            300: "#87cbde",
+            400: "#5fbad3",
+            500: "#37a9c8",
+            600: "#2c87a0",
+            700: "#216578",
+            800: "#164350",
+            900: "#0b2228",
+            950: "#051114",
+          },
+          accent: {
+            50: "#eeeff7",
+            100: "#dde0ee",
+            200: "#bbc0dd",
+            300: "#98a1cd",
+            400: "#7682bc",
+            500: "#5463ab",
+            600: "#434f89",
+            700: "#323b67",
+            800: "#222744",
+            900: "#111422",
+            950: "#080a11",
+          },
+          shadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+          warning: "#b3261e",
+          hero: {
+            radial: {
+              1: "#969FCB",
+              2: "#3ec1e3",
+              3: "#28cac0",
+            },
+            linear: {
+              1: "#b8b8b8",
+              2: "#FFFFFF",
+              3: "#FFFFFF",
+            }
+          },
+          skeleton: {
+            base: "#ebebeb",
+            highlight: "#f5f5f5",
+          }
+        },
+        dark: {
+          text: {
+            50: "#041615",
+            100: "#082b29",
+            200: "#105653",
+            300: "#18817c",
+            400: "#20aca5",
+            500: "#28d7cf",
+            600: "#53dfd8",
+            700: "#7ee7e2",
+            800: "#a9efec",
+            900: "#d4f7f5",
+            950: "#e9fbfa",
+          },
+          background: {
+            0: "#000000",
+            50: "#041514",
+            100: "#082b29",
+            200: "#105651",
+            300: "#18817a",
+            400: "#21aba2",
+            500: "#29d6cb",
+            600: "#54ded5",
+            700: "#7ee7e0",
+            800: "#a9efea",
+            900: "#d4f7f5",
+            950: "#eafbfa",
+          },
+          primary: {
+            50: "#091010",
+            100: "#122120",
+            200: "#244240",
+            300: "#366360",
+            400: "#488480",
+            500: "#5ba4a0",
+            600: "#7bb7b3",
+            700: "#9cc9c6",
+            800: "#bddbd9",
+            900: "#deedec",
+            950: "#eff6f5",
+          },
+          secondary: {
+            50: "#051114",
+            100: "#0b2228",
+            200: "#164450",
+            300: "#216778",
+            400: "#2c89a0",
+            500: "#37abc8",
+            600: "#5fbcd3",
+            700: "#87cdde",
+            800: "#afdde9",
+            900: "#d7eef4",
+            950: "#ebf7fa",
+          },
+          accent: {
+            50: "#080a11",
+            100: "#111422",
+            200: "#222744",
+            300: "#323b67",
+            400: "#434f89",
+            500: "#5463ab",
+            600: "#7682bc",
+            700: "#98a1cd",
+            800: "#bbc0dd",
+            900: "#dde0ee",
+            950: "#eeeff7",
+          },
+          shadow: "0 10px 15px -3px rgb(100 100 100 / 0.2), 0 4px 6px -4px rgb(100 100 100 / 0.2)",
+          warning: "#fda920",
+          hero: {
+            radial: {
+              1: "#969FCB",
+              2: "#194D5A",
+              3: "#041514",
+            },
+            linear: {
+              1: "#535353",
+              2: "#10423f",
+              3: "#000000",
+            }
+          },
+          skeleton: {
+            base: "#333333",
+            highlight: "#4d4d4d",
+          }
+        }
+      },
+      getSelector: mode => `[data-theme="${mode}"]`,
+    }),
+  },
+)

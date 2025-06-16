@@ -27,8 +27,8 @@ function IngredientSection() {
     setIngredients(nextIngredients);
   }
 
-  function editIngredient(name: string, newInfo: unknown) {
-  }
+  //function editIngredient(name: string, newInfo: unknown) {
+  //}
 
   if (!ingredients.length) {
     return (

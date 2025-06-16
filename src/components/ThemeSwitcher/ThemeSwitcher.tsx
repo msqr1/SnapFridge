@@ -1,26 +1,32 @@
 "use client";
 
-import { type ComponentProps, useState, useEffect } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import Button from "@components/Button";
 import { styled } from "@pigment-css/react";
 import VisuallyHidden from "@components/VisuallyHidden";
 import { DropdownMenu } from "radix-ui";
 import Icon from "@components/Icon";
-import useCurrentTheme from "./currentTheme.helper";
 
 interface Props extends ComponentProps<"button"> {
   mobile?: boolean;
 }
 
 function ThemeSwitcher({ mobile = false, ...delegated }: Props) {
-  const [isClient, setIsClient] = useState(false);
-  const [currentTheme, toggleTheme] = useCurrentTheme();
-
+  const [currentTheme, setTheme] = useState("");
   useEffect(() => {
-    setIsClient(true);
+    const theme = localStorage.getItem("theme") ||
+      (matchMedia("prefers-color-scheme: light") ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.display = "block";
   }, []);
 
-  if (!isClient) return undefined;
+  function toggleTheme() {
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    localStorage.setItem("theme", newTheme)
+    document.documentElement.setAttribute("data-theme", newTheme);
+    setTheme(newTheme);
+  }
+  
   const children = (
     <>
       <VisuallyHidden>
