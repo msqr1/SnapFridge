@@ -20,6 +20,7 @@ import { button, form, ul } from "motion/react-client";
 import heic2URL from "./HeicDCode";
 import { useInputState } from "../InputProvider";
 import useToast from "@components/ToastProvider/UseToast";
+import getJSONLexer from "./JSONLexer";
 
 function FileUpload() {
   const [imgURLs, setImgURLs] = useState<string[]>([]);
@@ -116,15 +117,22 @@ function FileUpload() {
       method: "POST",
       body: body,
     });
-    const stream = res.body!.pipeThrough(new TextDecoderStream());
+    const stream = res
+      .body!.pipeThrough(new TextDecoderStream())
+      .pipeThrough(getJSONLexer());
     const reader = stream.getReader();
     while (true) {
       const { done, value } = await reader.read();
-      console.log(value);
       if (done) {
-        return;
+        break;
       }
+      console.log(value);
+      dispatch({
+        type: "addIngredientsFromJSON",
+        json: value!,
+      });
     }
+    setPending(false);
   }
 
   return (

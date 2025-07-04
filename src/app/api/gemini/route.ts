@@ -50,15 +50,40 @@ const SYS_INSTRUCTION = `
 
 const ai = new GoogleGenAI({ apiKey: process.env["GEMINI_KEY"]! });
 
-function iterator2tream(it: AsyncGenerator<GenerateContentResponse>) {
+// JSON minifier: Remove all whitespace + array syntax so we don't have to worry about it later + save on some networking
+
+function generator2Stream(gen: AsyncGenerator<GenerateContentResponse>) {
+  const enum State {
+    Out,
+    InStr,
+  }
+  let state: State = State.Out;
   return new ReadableStream({
     async pull(controller) {
-      const { value, done } = await it.next();
+      const { value, done } = await gen.next();
       if (done) {
         controller.close();
-      } else {
-        controller.enqueue(value.text);
+        return;
       }
+      let processed = "";
+      for (const c of value.text!) {
+        switch (c) {
+          // Ignore whitespace, except when we're in a string
+          case " ":
+          case "\n":
+            if (state == State.InStr) {
+              break;
+            }
+          // Ignore arrays, it should only appear at the start and end
+          case "[":
+          case "]":
+            continue;
+          case '"':
+            state = state == State.InStr ? State.Out : State.InStr;
+        }
+        processed += c;
+      }
+      controller.enqueue(processed);
     },
   });
 }
@@ -118,16 +143,6 @@ export async function POST(req: Request) {
   for (const filename of filenames) {
     await ai.files.delete({ name: filename });
   }
-  let inArray = false;
 
-  return new Response(
-    iterator2tream(res).pipeThrough(
-      new TransformStream({
-        start() {},
-        transform(text: string, controller) {
-          controller.enqueue(text.toUpperCase());
-        },
-      })
-    )
-  );
+  return new Response(generator2Stream(res));
 }
