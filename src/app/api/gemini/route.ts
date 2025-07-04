@@ -1,6 +1,9 @@
-"use server";
-
-import { GoogleGenAI, Type, type FileData } from "@google/genai";
+import {
+  GoogleGenAI,
+  Type,
+  type FileData,
+  type GenerateContentResponse,
+} from "@google/genai";
 
 const SYS_INSTRUCTION = `
   ## ROLE
@@ -47,7 +50,21 @@ const SYS_INSTRUCTION = `
 
 const ai = new GoogleGenAI({ apiKey: process.env["GEMINI_KEY"]! });
 
-export default async function AIprocessImages(files: File[]) {
+function iterator2tream(it: AsyncGenerator<GenerateContentResponse>) {
+  return new ReadableStream({
+    async pull(controller) {
+      const { value, done } = await it.next();
+      if (done) {
+        controller.close();
+      } else {
+        controller.enqueue(value.text);
+      }
+    },
+  });
+}
+
+export async function POST(req: Request) {
+  const files = (await req.formData()).getAll("files") as File[];
   const fileDataParts: { fileData: FileData }[] = [];
   const filenames: string[] = [];
 
@@ -67,7 +84,7 @@ export default async function AIprocessImages(files: File[]) {
     });
   }
 
-  const response = await ai.models.generateContent({
+  const res = await ai.models.generateContentStream({
     model: "gemini-2.5-flash",
     contents: fileDataParts,
     config: {
@@ -101,9 +118,16 @@ export default async function AIprocessImages(files: File[]) {
   for (const filename of filenames) {
     await ai.files.delete({ name: filename });
   }
+  let inArray = false;
 
-  if (response.text) {
-    return response.text;
-  }
-  return "Error: Fetching from Gemini failed.";
+  return new Response(
+    iterator2tream(res).pipeThrough(
+      new TransformStream({
+        start() {},
+        transform(text: string, controller) {
+          controller.enqueue(text.toUpperCase());
+        },
+      })
+    )
+  );
 }

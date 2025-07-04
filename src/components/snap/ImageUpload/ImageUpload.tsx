@@ -2,9 +2,18 @@
 
 import { styled, css } from "@pigment-css/react";
 import Icon from "@components/Icon";
-import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+  type FormEvent,
+} from "react";
 import FridgeImage from "./FridgeImage";
 import { scaleClamped } from "@components/Global";
+import { BarLoader } from "react-spinners";
 import Button from "@components/Button";
 import { AnimatePresence, type Variants } from "motion/react";
 import { button, form, ul } from "motion/react-client";
@@ -12,15 +21,13 @@ import heic2URL from "./HeicDCode";
 import { useInputState } from "../InputProvider";
 import useToast from "@components/ToastProvider/UseToast";
 
-type FileUploadData = {
-  formAction: () => void;
-};
-
-function FileUpload({ formAction }: FileUploadData) {
+function FileUpload() {
   const [imgURLs, setImgURLs] = useState<string[]>([]);
+  const { state, dispatch } = useInputState();
+  const { files } = state;
   const worker = useRef<Worker>(undefined as unknown as Worker);
   const { addWarn } = useToast();
-  const { dispatch } = useInputState();
+  const [pending, setPending] = useState(false);
   const id = useId();
 
   // Initialize a worker
@@ -98,9 +105,31 @@ function FileUpload({ formAction }: FileUploadData) {
     setImgURLs(imgURLs.filter((_, idx) => idx !== index));
   }
 
+  async function fetchGemini(e: FormEvent) {
+    setPending(true);
+    e.preventDefault();
+    const body = new FormData();
+    for (const file of files) {
+      body.append("files", file);
+    }
+    const res = await fetch("/api/gemini", {
+      method: "POST",
+      body: body,
+    });
+    const stream = res.body!.pipeThrough(new TextDecoderStream());
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      console.log(value);
+      if (done) {
+        return;
+      }
+    }
+  }
+
   return (
     <>
-      <Wrapper layout action={formAction}>
+      <Wrapper layout onSubmit={fetchGemini}>
         <FileUploader>
           <label htmlFor={id} />
           <HiddenUpload
@@ -146,9 +175,14 @@ function FileUpload({ formAction }: FileUploadData) {
           )}
         </AnimatePresence>
       </Wrapper>
+      <BarLoader color="var(--text-950)" cssOverride={Fetching} loading={pending} />
     </>
   );
 }
+const Fetching: CSSProperties = {
+  width: "100%",
+  maxWidth: "576px",
+};
 
 const Wrapper = styled(form)({
   width: "100%",
