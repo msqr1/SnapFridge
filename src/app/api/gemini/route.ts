@@ -9,27 +9,25 @@ import { randomBytes } from "node:crypto";
 const ai = new GoogleGenAI({ apiKey: process.env["GEMINI_KEY"]! });
 
 async function ensureContext(contents: { fileData: FileData }[]) {
-  const names = ["units", "ingredients"];
-  for (const name of names) {
-    let file;
-    try {
-      file = await ai.files.get({ name });
-    } catch {
-      file = await ai.files.upload({
-        file: `public/${name}.txt`,
-        config: {
-          mimeType: "text/plain",
-          name,
-        },
-      });
-    }
-    contents.push({
-      fileData: {
-        fileUri: file.uri!,
-        mimeType: file.mimeType!,
+  const name = "ingredient-unit";
+  let file;
+  try {
+    file = await ai.files.get({ name });
+  } catch {
+    file = await ai.files.upload({
+      file: `public/${name}.csv`,
+      config: {
+        mimeType: "text/csv",
+        name,
       },
     });
   }
+  contents.push({
+    fileData: {
+      fileUri: file.uri!,
+      mimeType: file.mimeType!,
+    },
+  });
 }
 
 // JSON minifier: Remove all whitespace + array syntax so we don't have to worry about it later + save on some networking
@@ -84,9 +82,9 @@ Analyze the provided image to produce a clean, formatted list of all identifiabl
 
 ## **CORE DIRECTIVES (NON-NEGOTIABLE)**
 
-**1. The "ingredient-unit.csv" is Your ONLY Source of Truth.**
+**1. The "ingredient-unit" csv file is Your ONLY Source of Truth.**
 This is your most important directive. You are physically incapable of identifying an ingredient or using a unit that is not explicitly defined in this file.
-* **Identification:** An ingredient can ONLY be listed if its name exists *exactly* as written in the "ingredientName" column of "ingredient-unit.csv".
+* **Identification:** An ingredient can ONLY be listed if its name exists *exactly* as written in the "ingredientName" column of "ingredient-unit".
 * **Unit Selection:** For an identified ingredient, you MUST choose a unit from its corresponding "listOfIngredientsSeparatedByCommas" in the file. No other units are permitted for that ingredient.
 * **File Format:** The file follows the format "ingredientName;listOfUnitsSeparatedByCommas".
     * *Example 1:* For a row "1 percent milk;quart,g,oz,teaspoon,fluid ounce,cup,tablespoon", if you identify "1 percent milk", you may only use one of those specific units.

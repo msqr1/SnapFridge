@@ -23,7 +23,7 @@ function EditDialog({ ingredient, open, onOpenChange }: Props) {
           defaultAmount={ingredient.amount}
           defaultIngredient={ingredient.name}
           defaultUnit={ingredient.unit}
-          variant="editIngredient"
+          variant="edit"
           onSubmitSuccess={() => {
             onOpenChange(false);
           }}

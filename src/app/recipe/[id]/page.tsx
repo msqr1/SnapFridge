@@ -14,7 +14,6 @@ import { notFound } from "next/navigation";
 const CACHE_ONE_HOUR = 3600;
 
 async function getRecipe(id: string) {
-  let recipeInfo;
   const recipeInfoRes = await fetch(
     `https://api.spoonacular.com/recipes/${id}/information?includeNutrition=true`,
     {
@@ -29,7 +28,6 @@ async function getRecipe(id: string) {
 
   if (!recipeInfoRes.ok) {
     if (recipeInfoRes.status === 404) {
-      console.warn(`Recipe ${id} not found`);
       return null;
     }
 
@@ -39,10 +37,9 @@ async function getRecipe(id: string) {
     );
   }
 
-  recipeInfo = (await recipeInfoRes.json()) as SpoonacularRecipe;
+  const recipeInfo = (await recipeInfoRes.json()) as SpoonacularRecipe;
 
   if (!recipeInfo || Object.keys(recipeInfo).length === 0) {
-    console.warn(`Spoonacular returned empty/invalid recipe for ID ${id}.`);
     return null;
   }
   return recipeInfo;
@@ -50,14 +47,7 @@ async function getRecipe(id: string) {
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let recipeInfo: SpoonacularRecipe | null = null; // Initialize to null
-
-  try {
-    recipeInfo = await getRecipe(id);
-  } catch (e) {
-    // Send to error.tsx
-    throw e;
-  }
+  const recipeInfo = await getRecipe(id);
 
   // Send to not-found.tsx
   if (!recipeInfo) notFound();
